@@ -1,30 +1,35 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 import AgoraRTC, {
-    IAgoraRTCClient,
-    IAgoraRTCRemoteUser,
-    ICameraVideoTrack,
-    IMicrophoneAudioTrack,
-    ILocalVideoTrack,
-  } from 'agora-rtc-sdk-ng';
+  IAgoraRTCClient,
+  IAgoraRTCRemoteUser,
+  ICameraVideoTrack,
+  IMicrophoneAudioTrack,
+  ILocalVideoTrack,
+} from 'agora-rtc-sdk-ng';
 import { AGORA_CONFIG } from '../config/agora';
 
 export const useAgora = (channel: string) => {
   const [localVideoTrack, setLocalVideoTrack] = useState<ICameraVideoTrack | null>(null);
   const [localAudioTrack, setLocalAudioTrack] = useState<IMicrophoneAudioTrack | null>(null);
-  const [screenTrack, setScreenTrack] = useState<ILocalVideoTrack | null>(null);  const [joinState, setJoinState] = useState(false);
+  const [screenTrack, setScreenTrack] = useState<ILocalVideoTrack | null>(null);
+  const [joinState, setJoinState] = useState(false);
   const [remoteUsers, setRemoteUsers] = useState<IAgoraRTCRemoteUser[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [isScreenSharing, setIsScreenSharing] = useState(false);
-  
+
   const clientRef = useRef<IAgoraRTCClient | null>(null);
-  //@ts-expect-error
+
+  // Initialize Agora client
   useEffect(() => {
     if (!clientRef.current) {
       clientRef.current = AgoraRTC.createClient({ mode: 'rtc', codec: 'vp8' });
     }
-    return () => cleanup();
+    return () => {
+      cleanup();
+    };
   }, []);
 
+  // Cleanup resources
   const cleanup = useCallback(async () => {
     if (clientRef.current) {
       if (localAudioTrack) {
@@ -51,11 +56,12 @@ export const useAgora = (channel: string) => {
     }
   }, [localAudioTrack, localVideoTrack, screenTrack, joinState]);
 
+  // Start screen sharing
   const startScreenShare = async () => {
     if (!clientRef.current) return;
-    
+
     try {
-        //@ts-expect-error
+      //@ts-ignore
       const screenVideoTrack = await AgoraRTC.createScreenVideoTrack();
       if (localVideoTrack) {
         await clientRef.current.unpublish(localVideoTrack);
@@ -69,15 +75,16 @@ export const useAgora = (channel: string) => {
     }
   };
 
+  // Stop screen sharing
   const stopScreenShare = async () => {
     if (!clientRef.current || !screenTrack) return;
-    
+
     try {
       await clientRef.current.unpublish(screenTrack);
       screenTrack.close();
       setScreenTrack(null);
       setIsScreenSharing(false);
-      
+
       if (localVideoTrack) {
         await clientRef.current.publish(localVideoTrack);
       }
@@ -86,6 +93,7 @@ export const useAgora = (channel: string) => {
     }
   };
 
+  // Listen for remote user events
   useEffect(() => {
     const client = clientRef.current;
     if (!client) return;
@@ -93,7 +101,7 @@ export const useAgora = (channel: string) => {
     const handleUserPublished = async (user: IAgoraRTCRemoteUser, mediaType: 'audio' | 'video') => {
       await client.subscribe(user, mediaType);
       if (mediaType === 'video') {
-        setRemoteUsers(prev => [...prev.filter(u => u.uid !== user.uid), user]);
+        setRemoteUsers((prev) => [...prev.filter((u) => u.uid !== user.uid), user]);
       }
       if (mediaType === 'audio') {
         user.audioTrack?.play();
@@ -101,7 +109,7 @@ export const useAgora = (channel: string) => {
     };
 
     const handleUserUnpublished = (user: IAgoraRTCRemoteUser) => {
-      setRemoteUsers(prev => prev.filter(u => u.uid !== user.uid));
+      setRemoteUsers((prev) => prev.filter((u) => u.uid !== user.uid));
     };
 
     client.on('user-published', handleUserPublished);
@@ -113,10 +121,11 @@ export const useAgora = (channel: string) => {
     };
   }, []);
 
+  // Join the channel
   const join = useCallback(async () => {
     const client = clientRef.current;
     if (!client) return;
-    
+
     try {
       await cleanup();
 
@@ -124,35 +133,23 @@ export const useAgora = (channel: string) => {
         throw new Error('Agora App ID is not configured.');
       }
 
-      try {
-        await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-      } catch (err) {
-        console.log(err)
-        throw new Error('Camera or microphone permission denied.');
-      }
+      await client.join(AGORA_CONFIG.appId, channel, AGORA_CONFIG.token || null);
 
-      await client.join(
-        AGORA_CONFIG.appId,
-        channel,
-        AGORA_CONFIG.token
-      );
-      
       const [audioTrack, videoTrack] = await Promise.all([
         AgoraRTC.createMicrophoneAudioTrack(),
-        AgoraRTC.createCameraVideoTrack()
+        AgoraRTC.createCameraVideoTrack(),
       ]);
-      
+
       setLocalAudioTrack(audioTrack);
       setLocalVideoTrack(videoTrack);
-      
+
       await client.publish([audioTrack, videoTrack]);
-      
+
       setError(null);
       setJoinState(true);
     } catch (err) {
-      //@ts-expect-error
-      setError(err.message || 'Failed to join');
       console.error('Join error:', err);
+      setError((err as Error).message || 'Failed to join');
       await cleanup();
     }
   }, [channel, cleanup]);

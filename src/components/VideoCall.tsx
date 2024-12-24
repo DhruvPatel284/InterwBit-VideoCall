@@ -10,7 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
-export const VideoCall = () => {
+ export default function VideoCall(){
   const [channel, setChannel] = useState('main');
   const [userName, setUserName] = useState('');
   const [showNameModal, setShowNameModal] = useState(true);
@@ -102,6 +102,7 @@ export const VideoCall = () => {
         onScreenShare={handleScreenShare}
         isScreenSharing={isScreenSharing}
       />
+
     </div>
   );
 };

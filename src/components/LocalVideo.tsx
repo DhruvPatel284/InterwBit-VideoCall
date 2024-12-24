@@ -21,7 +21,6 @@ export const LocalVideo = ({ videoTrack, isConnected, userName }: LocalVideoProp
 
   return (
     <VideoContainer
-    //@ts-expect-error
       videoRef={localVideoRef}
       label={`${userName} ${isConnected ? '(Connected)' : '(Connecting...)'}`}
     />

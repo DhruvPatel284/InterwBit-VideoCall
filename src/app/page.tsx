@@ -1,5 +1,5 @@
-import { VideoCall } from '@/components/VideoCall';
+import VideoCallWrapper from '@/components/VideoCallWrapper';
 
 export default function Home() {
-  return <VideoCall />;
+  return <VideoCallWrapper />;
 }

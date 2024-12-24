@@ -18,7 +18,6 @@ export const VideoContainer = ({
   return (
     <Card className="relative aspect-video overflow-hidden bg-muted">
       <div
-      //@ts-expect-error
         ref={videoRef}
         id={playerId}
         className="w-full h-full"

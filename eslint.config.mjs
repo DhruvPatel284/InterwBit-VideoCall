@@ -19,7 +19,7 @@ const eslintConfig = [
         {
           "ts-expect-error": false, // Disable warnings for @ts-expect-error
           "ts-ignore": false,
-          "ts-nocheck": true,
+          "ts-nocheck": false,
           "ts-check": false
         }
       ]

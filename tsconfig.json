@@ -11,6 +11,8 @@
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
+    "allowSyntheticDefaultImports": true,
+    "strict": false,
     "jsx": "preserve",
     "incremental": true,
     "plugins": [
