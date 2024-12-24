@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useAgora } from '../hooks/useAgora';
 import { VideoGrid } from './VideoGrid';
 import { JoinForm } from './JoinForm';
@@ -87,11 +87,10 @@ export const VideoCall = () => {
       />
 
       <VideoGrid
-       //@ts-ignore
+       //@ts-expect-error
         localVideoTrack={isScreenSharing ? screenTrack : localVideoTrack}
         remoteUsers={remoteUsers}
         isConnected={joinState}
-        //@ts-ignore
         userName={userName}
       />
 

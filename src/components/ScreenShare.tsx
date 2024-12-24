@@ -19,7 +19,7 @@ export const ScreenShare = ({ screenTrack }: ScreenShareProps) => {
 
   return (
     <VideoContainer
-    //@ts-ignore
+    //@ts-expect-error
       videoRef={screenRef}
       label="Screen Share"
     />

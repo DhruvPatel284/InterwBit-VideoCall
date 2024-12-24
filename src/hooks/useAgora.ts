@@ -17,7 +17,7 @@ export const useAgora = (channel: string) => {
   const [isScreenSharing, setIsScreenSharing] = useState(false);
   
   const clientRef = useRef<IAgoraRTCClient | null>(null);
-  //@ts-ignore
+  //@ts-expect-error
   useEffect(() => {
     if (!clientRef.current) {
       clientRef.current = AgoraRTC.createClient({ mode: 'rtc', codec: 'vp8' });
@@ -55,7 +55,7 @@ export const useAgora = (channel: string) => {
     if (!clientRef.current) return;
     
     try {
-        //@ts-ignore
+        //@ts-expect-error
       const screenVideoTrack = await AgoraRTC.createScreenVideoTrack();
       if (localVideoTrack) {
         await clientRef.current.unpublish(localVideoTrack);
@@ -127,6 +127,7 @@ export const useAgora = (channel: string) => {
       try {
         await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
       } catch (err) {
+        console.log(err)
         throw new Error('Camera or microphone permission denied.');
       }
 
@@ -148,7 +149,8 @@ export const useAgora = (channel: string) => {
       
       setError(null);
       setJoinState(true);
-    } catch (err: any) {
+    } catch (err) {
+      //@ts-expect-error
       setError(err.message || 'Failed to join');
       console.error('Join error:', err);
       await cleanup();
